@@ -1,0 +1,94 @@
+import time
+import os
+
+CSI = '\x1b['
+RESET = f'{CSI}0m'
+ZERO = f'{CSI}0G'
+ERASE = f'{CSI}2K'
+BLUE = f'{CSI}48;5;21m'
+RED = f'{CSI}48;5;196m'
+
+def clear_screen():
+    print(f'{CSI}2J{CSI}3J{CSI}H', end='', flush=True)
+
+#________________________________________1
+
+def draw_line1(color, width, height):
+    for _ in range(height):
+        print(f'{CSI}48;5;{color}m{" " * width}{RESET}')
+
+def draw_flag(width=36, height1=3):
+    draw_line1(160, width, height1)
+    draw_line1(15, width, height1)
+    draw_line1(20, width, height1)
+
+#________________________________________2
+
+def draw_line(offset, inset, length, color=220):
+    offset_part = "  " * offset
+    filled_part = "  " * length
+    inset_part = "  " * inset
+    cross = f'{offset_part}{CSI}48;5;{color}m{filled_part}{RESET}{inset_part}{CSI}48;5;{color}m{filled_part}{RESET}'
+    print(cross + offset_part + cross)
+
+def draw_figure(color):
+    offset = 0
+    inset = 10
+    length = 1
+    lines = 0
+
+    while inset != 0:
+        draw_line(offset, inset, length, color)
+        inset -= 2
+        offset += 1
+        lines += 1
+
+    while inset <= 10:
+        draw_line(offset, inset, length, color)
+        inset += 2
+        offset -= 1
+        lines += 1
+
+    return lines
+
+
+def animate():
+    for color in range(16, 26):
+        lines = draw_figure(color)
+        print(f"{CSI}{lines}A{ZERO}", end="", flush=True)
+        time.sleep(0.2)
+    print(f"{CSI}J", end="", flush=True)
+
+#________________________________________3
+
+def sequence():
+    file = open('sequence1.txt', 'r')
+    odd_sum = 0
+    even_sum = 0
+    position = 1
+    for line in file:
+        number = abs(float(line))
+        if position % 2 == 1:
+            odd_sum += number
+        else:
+            even_sum += number
+        position += 1
+
+    total = odd_sum + even_sum
+    odd_1 = odd_sum / total * 100
+    even_1 = 100 - odd_1
+
+    print(f'{RED}{" " * int(odd_1)}{RESET} {odd_1:.1f}%')
+    print(f'{BLUE}{" " * int(even_1)}{RESET} {even_1:.1f}%')
+
+#________________________________________
+
+if __name__ == '__main__':
+    draw_flag()
+    time.sleep(2)
+    clear_screen()
+    animate()
+    clear_screen()
+    sequence()
+    time.sleep(2)
+    clear_screen()
